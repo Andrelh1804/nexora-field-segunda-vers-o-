@@ -11,7 +11,7 @@ dotenv.config();
 const app = express();
 app.use(express.json({ limit: '10mb' }));
 
-const PORT = 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT) : 5000;
 
 // Initialize Google GenAI SDK
 const geminiApiKey = process.env.GEMINI_API_KEY;

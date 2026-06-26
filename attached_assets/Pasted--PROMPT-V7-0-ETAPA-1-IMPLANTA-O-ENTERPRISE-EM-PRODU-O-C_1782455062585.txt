@@ -1,0 +1,605 @@
+# PROMPT V7.0 — ETAPA 1: IMPLANTAÇÃO ENTERPRISE EM PRODUÇÃO (CLOUD, ALTA DISPONIBILIDADE, ESCALABILIDADE E OPERAÇÃO 24x7)
+
+## CONTEXTO
+
+Você atuará como um **Comitê Executivo de Arquitetura Cloud Enterprise**, composto por:
+
+* Chief Cloud Architect
+* Principal DevSecOps Engineer
+* Site Reliability Engineer (SRE)
+* Kubernetes Administrator (CKA)
+* Google Cloud Solutions Architect
+* Network Security Engineer
+* Database Architect
+* FinOps Engineer
+* Platform Engineer
+* Enterprise Infrastructure Architect
+
+Sua missão é preparar a **NexoraField AI** para operar em **produção corporativa**, garantindo alta disponibilidade, escalabilidade automática, resiliência, segurança, observabilidade e recuperação de desastres.
+
+**IMPORTANTE**
+
+* Não remover nenhuma funcionalidade existente.
+* Não alterar regras de negócio.
+* Não modificar interfaces públicas.
+* Todas as alterações devem ser compatíveis com a arquitetura atual.
+* Toda infraestrutura deve ser definida como código (Infrastructure as Code).
+* Toda configuração deve utilizar variáveis de ambiente seguras.
+* Toda implantação deve ser reproduzível.
+
+---
+
+# OBJETIVO
+
+Transformar a infraestrutura atual em uma plataforma Cloud Native Enterprise capaz de operar 24 horas por dia, 7 dias por semana, suportando milhares de empresas, técnicos e ordens de serviço simultaneamente.
+
+---
+
+# FASE 1 — AUDITORIA COMPLETA DA INFRAESTRUTURA
+
+Realizar uma auditoria automática identificando:
+
+* Serviços existentes
+* Dependências
+* Containers
+* Bancos de dados
+* Cache
+* Filas
+* APIs
+* Webhooks
+* Variáveis de ambiente
+* Secrets
+* Volumes
+* Storage
+* Certificados
+* Balanceadores
+* DNS
+* Monitoramento
+* Custos atuais
+* Gargalos
+* Pontos únicos de falha (Single Point of Failure)
+
+Gerar:
+
+* INFRASTRUCTURE_AUDIT.md
+* DEPENDENCY_MAP.md
+* CLOUD_MIGRATION_PLAN.md
+
+---
+
+# FASE 2 — CONTAINERIZAÇÃO
+
+Garantir que todos os serviços estejam containerizados.
+
+Implementar:
+
+* Dockerfiles otimizados
+* Multi-stage builds
+* Imagens mínimas
+* Healthcheck
+* Readiness Probe
+* Liveness Probe
+
+Separar containers para:
+
+* Frontend
+* Backend API
+* Worker IA
+* Worker Financeiro
+* Worker CRM
+* Worker Notifications
+* Scheduler
+* Webhooks
+* Gateway
+
+---
+
+# FASE 3 — KUBERNETES
+
+Criar estrutura completa Kubernetes.
+
+Implementar:
+
+Namespaces
+
+Deployments
+
+Services
+
+Ingress
+
+ConfigMaps
+
+Secrets
+
+Persistent Volumes
+
+Horizontal Pod Autoscaler
+
+Vertical Pod Autoscaler
+
+Pod Disruption Budget
+
+Affinity
+
+Anti-Affinity
+
+Node Selector
+
+Resource Limits
+
+Resource Requests
+
+Rolling Update
+
+Canary Deployment
+
+Blue/Green Deployment
+
+Network Policies
+
+Gerar todos os manifestos YAML.
+
+---
+
+# FASE 4 — GOOGLE CLOUD
+
+Preparar ambiente Google Cloud.
+
+Implementar:
+
+Cloud Run
+
+GKE
+
+Cloud SQL PostgreSQL
+
+Memorystore Redis
+
+Cloud Storage
+
+Secret Manager
+
+Artifact Registry
+
+Cloud Logging
+
+Cloud Monitoring
+
+Cloud Trace
+
+Cloud Scheduler
+
+Cloud Tasks
+
+Cloud Build
+
+Cloud Armor
+
+Cloud CDN
+
+Cloud DNS
+
+Cloud NAT
+
+VPC
+
+Sub-redes privadas
+
+Firewall
+
+---
+
+# FASE 5 — BANCO DE DADOS ENTERPRISE
+
+Configurar PostgreSQL HA.
+
+Implementar:
+
+Connection Pool
+
+Read Replicas
+
+Failover
+
+Backup Automático
+
+Point-in-Time Recovery
+
+Versionamento
+
+Migrations
+
+Vacuum
+
+Monitoramento
+
+Otimização de índices
+
+Análise de consultas lentas
+
+---
+
+# FASE 6 — CACHE E FILAS
+
+Configurar Redis.
+
+Implementar:
+
+Cache
+
+Session Store
+
+Queue
+
+Pub/Sub
+
+Rate Limiting
+
+BullMQ
+
+Retry
+
+Dead Letter Queue
+
+Scheduler
+
+Workers
+
+---
+
+# FASE 7 — ARMAZENAMENTO
+
+Migrar uploads.
+
+Implementar:
+
+Cloud Storage
+
+Versionamento
+
+CDN
+
+URLs assinadas
+
+Políticas de retenção
+
+Backup
+
+Antivírus
+
+Compressão
+
+---
+
+# FASE 8 — SEGURANÇA
+
+Implementar:
+
+HTTPS obrigatório
+
+TLS 1.3
+
+WAF
+
+Cloud Armor
+
+JWT
+
+RBAC
+
+Secrets Manager
+
+Rotação automática de credenciais
+
+Firewall
+
+Rate Limiting
+
+CORS
+
+CSP
+
+HSTS
+
+Proteção contra DDoS
+
+Proteção contra SQL Injection
+
+Proteção contra XSS
+
+Proteção contra SSRF
+
+Proteção contra CSRF
+
+Proteção contra força bruta
+
+Auditoria completa
+
+---
+
+# FASE 9 — OBSERVABILIDADE
+
+Implementar:
+
+OpenTelemetry
+
+Prometheus
+
+Grafana
+
+Jaeger
+
+Alertmanager
+
+Cloud Logging
+
+Cloud Monitoring
+
+Tracing distribuído
+
+Health Checks
+
+Dashboards executivos
+
+KPIs
+
+Alertas automáticos
+
+Monitoramento de APIs
+
+Monitoramento do banco
+
+Monitoramento do Redis
+
+Monitoramento dos Workers
+
+Monitoramento dos Webhooks
+
+Monitoramento da IA
+
+---
+
+# FASE 10 — CI/CD
+
+Criar pipeline corporativo.
+
+Implementar:
+
+GitHub Actions
+
+Lint
+
+Build
+
+Testes Unitários
+
+Testes Integração
+
+Testes E2E
+
+Security Scan
+
+Dependency Scan
+
+Container Scan
+
+Deploy Automático
+
+Rollback Automático
+
+Canary
+
+Blue/Green
+
+Aprovação manual para Produção
+
+Versionamento Semântico
+
+Release Notes
+
+---
+
+# FASE 11 — BACKUP E DISASTER RECOVERY
+
+Implementar:
+
+Backup diário
+
+Backup incremental
+
+Backup contínuo
+
+Backup criptografado
+
+Restore automatizado
+
+Teste de restauração
+
+Replicação entre regiões
+
+Plano de Disaster Recovery
+
+RTO
+
+RPO
+
+Runbooks
+
+Simulação de desastre
+
+---
+
+# FASE 12 — ESCALABILIDADE
+
+Realizar testes reais.
+
+Executar:
+
+10 usuários
+
+100 usuários
+
+1.000 usuários
+
+5.000 usuários
+
+10.000 usuários
+
+50.000 usuários
+
+100.000 usuários
+
+Registrar:
+
+CPU
+
+RAM
+
+Banco
+
+Redis
+
+Latência
+
+Tempo médio
+
+Tempo máximo
+
+Throughput
+
+Erros
+
+Escalabilidade
+
+Auto Scaling
+
+---
+
+# FASE 13 — FINOPS
+
+Calcular custos reais.
+
+Gerar:
+
+Custo mensal
+
+Custo anual
+
+Custo por cliente
+
+Custo por chamado
+
+Custo por técnico
+
+Custo por IA
+
+Custo por armazenamento
+
+Custo por banco
+
+Custo por API
+
+Projeções para:
+
+100 clientes
+
+500 clientes
+
+1.000 clientes
+
+5.000 clientes
+
+10.000 clientes
+
+---
+
+# FASE 14 — DOCUMENTAÇÃO
+
+Gerar automaticamente:
+
+INFRASTRUCTURE.md
+
+DEPLOYMENT_GUIDE.md
+
+DISASTER_RECOVERY.md
+
+BACKUP_POLICY.md
+
+SECURITY_BASELINE.md
+
+NETWORK_ARCHITECTURE.md
+
+KUBERNETES_GUIDE.md
+
+GOOGLE_CLOUD_ARCHITECTURE.md
+
+RUNBOOKS.md
+
+SRE_GUIDE.md
+
+OPERATIONS_MANUAL.md
+
+FINOPS_REPORT.md
+
+---
+
+# FASE 15 — PAINEL "REALIDADE DO SISTEMA"
+
+Adicionar uma nova seção:
+
+## Infraestrutura Enterprise
+
+Exibir em tempo real:
+
+* Status do Kubernetes
+* Pods ativos
+* Uso de CPU
+* Uso de memória
+* Banco PostgreSQL
+* Redis
+* Workers
+* Webhooks
+* Cloud Run
+* Cloud Storage
+* Filas
+* Auto Scaling
+* Backup
+* Replicação
+* Certificados
+* CDN
+* Disponibilidade
+* SLA
+* SLO
+* RTO
+* RPO
+* Custos estimados
+* Incidentes
+* Alertas
+
+Todos os indicadores devem ser alimentados automaticamente por métricas reais, nunca por valores estáticos.
+
+---
+
+# CRITÉRIOS DE ACEITE
+
+A etapa somente poderá ser considerada concluída quando:
+
+* Todos os serviços estiverem containerizados.
+* A infraestrutura estiver definida como código.
+* O ambiente suportar alta disponibilidade.
+* O banco possuir backup e failover testados.
+* O Redis operar em alta disponibilidade.
+* O deploy ocorrer sem indisponibilidade.
+* Os testes automatizados forem aprovados.
+* O monitoramento estiver ativo.
+* Os alertas estiverem configurados.
+* Os custos forem documentados.
+* Os procedimentos de recuperação forem validados.
+* Toda a documentação estiver sincronizada com a infraestrutura implantada.
+
+---
+
+# RESULTADO ESPERADO
+
+Ao concluir esta etapa, a NexoraField AI deverá operar sobre uma infraestrutura **Cloud Native Enterprise**, altamente disponível, resiliente, segura e observável, preparada para crescimento horizontal, implantação contínua, recuperação automática de falhas e operação ininterrupta (24x7). A plataforma deverá estar apta a atender milhares de empresas e técnicos simultaneamente, com governança operacional, monitoramento em tempo real, custos previsíveis e processos de implantação totalmente automatizados. Além disso, o painel **"Realidade do Sistema ⚖️"** deverá refletir automaticamente o estado operacional da infraestrutura com base em métricas reais, servindo como fonte confiável para auditorias, operação e tomada de decisão.
