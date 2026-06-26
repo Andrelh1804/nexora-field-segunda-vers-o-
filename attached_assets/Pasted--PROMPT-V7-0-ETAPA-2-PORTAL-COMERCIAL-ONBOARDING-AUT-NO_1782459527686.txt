@@ -1,0 +1,587 @@
+# PROMPT V7.0 — ETAPA 2: PORTAL COMERCIAL, ONBOARDING AUTÔNOMO, BILLING SaaS E AUTOMAÇÃO DE CLIENTES DA NEXORAFIELD AI
+
+## CONTEXTO
+
+Você atuará como um **Comitê Executivo de Produto, Growth, Customer Success, Revenue Operations (RevOps), UX Enterprise, Billing SaaS e Arquitetura de Plataformas**, composto por:
+
+* Chief Product Officer (CPO)
+* Chief Revenue Officer (CRO)
+* Principal SaaS Architect
+* Principal UX/UI Designer
+* Growth Engineer
+* RevOps Architect
+* Customer Success Lead
+* Billing & Subscription Architect
+* Enterprise CRM Architect
+* AI Automation Specialist
+* Security & Compliance Officer
+
+Sua missão é transformar a **NexoraField AI** em uma plataforma SaaS **self-service**, permitindo que empresas realizem todo o processo de contratação, implantação, configuração, treinamento e início da operação de forma totalmente automatizada, sem intervenção manual da equipe da Nexora.
+
+**IMPORTANTE**
+
+* Não remover funcionalidades existentes.
+* Não alterar regras de negócio.
+* Preservar compatibilidade retroativa.
+* Integrar todas as novas funcionalidades à arquitetura existente.
+* Garantir conformidade com LGPD.
+* Todas as ações devem ser auditáveis.
+
+---
+
+# OBJETIVO
+
+Criar um ecossistema comercial completo capaz de:
+
+* Atrair novos clientes.
+* Converter visitantes em assinantes.
+* Automatizar todo o onboarding.
+* Automatizar faturamento.
+* Automatizar treinamentos.
+* Automatizar implantação.
+* Automatizar Customer Success.
+* Automatizar renovação.
+* Automatizar retenção.
+* Automatizar expansão de contratos.
+
+Toda a jornada deverá ocorrer sem intervenção humana.
+
+---
+
+# FASE 1 — PORTAL COMERCIAL
+
+Desenvolver um portal institucional moderno, responsivo e orientado à conversão.
+
+Criar páginas para:
+
+* Home
+* Funcionalidades
+* Segmentos atendidos
+* Casos de sucesso
+* Comparativo de planos
+* Demonstração interativa
+* Simulador de ROI
+* Simulador de economia operacional
+* Central de vídeos
+* FAQ
+* Blog
+* Contato
+* Parceiros
+* Programa de Indicação
+* Área do Cliente
+* Área do Técnico
+* Status da Plataforma
+* Roadmap Público
+
+Adicionar:
+
+* SEO avançado
+* Performance otimizada
+* Schema.org
+* Google Analytics 4
+* Google Tag Manager
+* Meta Pixel
+* LinkedIn Insight Tag
+* Consentimento LGPD
+
+---
+
+# FASE 2 — CADASTRO SELF-SERVICE
+
+Criar fluxo completo de cadastro.
+
+Permitir:
+
+* Cadastro da empresa
+* Validação de CNPJ
+* Consulta automática de dados
+* Cadastro do administrador
+* Convite para equipe
+* Cadastro inicial de técnicos
+* Cadastro inicial de filiais
+* Configuração inicial da empresa
+
+Implementar:
+
+* Verificação de e-mail
+* Verificação por SMS
+* MFA opcional
+* Convite por link seguro
+* Auditoria completa
+
+---
+
+# FASE 3 — BILLING SaaS
+
+Implementar assinatura recorrente.
+
+Integrar:
+
+* Asaas
+* Stripe
+* Efí
+* Mercado Pago (opcional)
+
+Permitir:
+
+* Assinatura mensal
+* Assinatura anual
+* Plano gratuito
+* Trial
+* Upgrade
+* Downgrade
+* Suspensão
+* Reativação
+* Cancelamento
+* Renovação automática
+
+Implementar:
+
+* Cupons
+* Créditos
+* Cashback
+* Cobrança proporcional
+* Faturas
+* PIX
+* Cartão
+* Boleto
+* Nota Fiscal (quando aplicável)
+
+---
+
+# FASE 4 — ONBOARDING AUTÔNOMO
+
+Criar um assistente inteligente de implantação.
+
+O sistema deverá:
+
+* Configurar empresa
+* Criar usuários iniciais
+* Criar departamentos
+* Criar equipes
+* Criar regiões
+* Configurar planos
+* Configurar permissões
+* Configurar integrações
+* Configurar notificações
+
+Exibir progresso:
+
+0%
+
+25%
+
+50%
+
+75%
+
+100%
+
+Cada etapa deverá ser validada automaticamente.
+
+---
+
+# FASE 5 — IMPORTAÇÃO DE DADOS
+
+Permitir importação de:
+
+* Clientes
+* Técnicos
+* Equipamentos
+* Ordens de Serviço
+* Produtos
+* Estoque
+* Contratos
+* Leads
+
+Aceitar:
+
+CSV
+
+Excel
+
+JSON
+
+API
+
+Google Sheets
+
+Validar:
+
+Duplicidade
+
+Campos obrigatórios
+
+Integridade
+
+Relacionamentos
+
+---
+
+# FASE 6 — TREINAMENTO AUTOMÁTICO
+
+Criar uma plataforma interna de aprendizagem.
+
+Disponibilizar:
+
+* Trilhas de aprendizagem
+* Vídeos
+* Documentação
+* Tutoriais
+* Simulações
+* Quiz
+* Certificados
+* Avaliações
+* Progresso
+
+Separar conteúdos para:
+
+* Administrador
+* Gestor
+* Técnico
+* Financeiro
+* Comercial
+
+Adicionar IA para responder dúvidas em tempo real.
+
+---
+
+# FASE 7 — CUSTOMER SUCCESS
+
+Criar módulo completo.
+
+Implementar:
+
+Health Score
+
+Engajamento
+
+Uso da plataforma
+
+Alertas de abandono
+
+Recomendações
+
+Plano de sucesso
+
+Pesquisas NPS
+
+CSAT
+
+CES
+
+Histórico completo
+
+Playbooks automáticos
+
+---
+
+# FASE 8 — CRM DE RECEITA (REVOPS)
+
+Automatizar todo o ciclo comercial.
+
+Implementar:
+
+Lead
+
+MQL
+
+SQL
+
+Oportunidade
+
+Proposta
+
+Negociação
+
+Contrato
+
+Onboarding
+
+Ativação
+
+Expansão
+
+Renovação
+
+Upsell
+
+Cross-sell
+
+Reativação
+
+Churn
+
+Cada mudança deve disparar eventos para o n8n.
+
+---
+
+# FASE 9 — AUTOMAÇÕES
+
+Criar automações utilizando:
+
+n8n
+
+Gemini
+
+Evolution API
+
+Resend
+
+Twilio
+
+Google Calendar
+
+Google Meet
+
+Calendly
+
+Automatizar:
+
+Boas-vindas
+
+Treinamentos
+
+Agendamentos
+
+Cobranças
+
+Renovações
+
+Lembretes
+
+Pesquisas
+
+Convites
+
+Recuperação de clientes
+
+---
+
+# FASE 10 — PORTAIS ESPECIALIZADOS
+
+Criar portais independentes para:
+
+Empresa
+
+Administrador
+
+Gestor
+
+Técnico
+
+Cliente Final
+
+Distribuidor
+
+Parceiro
+
+Representante Comercial
+
+Cada portal deverá possuir:
+
+Dashboard
+
+KPIs
+
+Notificações
+
+Documentos
+
+Suporte
+
+Configurações
+
+---
+
+# FASE 11 — IA COMERCIAL
+
+Criar agentes especializados.
+
+Implementar:
+
+AI Sales
+
+AI Onboarding
+
+AI Customer Success
+
+AI Revenue
+
+AI CRM
+
+AI Training
+
+Cada agente deverá:
+
+Responder dúvidas
+
+Criar propostas
+
+Recomendar planos
+
+Detectar risco de churn
+
+Identificar oportunidades
+
+Gerar insights
+
+Personalizar comunicações
+
+---
+
+# FASE 12 — DASHBOARDS EXECUTIVOS
+
+Criar dashboards para:
+
+CEO
+
+Comercial
+
+Marketing
+
+Customer Success
+
+Financeiro
+
+RevOps
+
+Parceiros
+
+Mostrar:
+
+MRR
+
+ARR
+
+CAC
+
+LTV
+
+Payback
+
+Conversão
+
+Churn
+
+NPS
+
+Receita
+
+Ticket Médio
+
+Pipeline
+
+Funil
+
+Tempo de implantação
+
+Tempo até primeiro valor (Time to Value)
+
+---
+
+# FASE 13 — SEGURANÇA
+
+Garantir:
+
+LGPD
+
+Consentimento
+
+Auditoria
+
+Criptografia
+
+JWT
+
+RBAC
+
+MFA
+
+Logs
+
+Versionamento
+
+Assinaturas digitais
+
+Proteção contra fraudes
+
+---
+
+# FASE 14 — DOCUMENTAÇÃO
+
+Gerar automaticamente:
+
+COMMERCIAL_PORTAL.md
+
+ONBOARDING_GUIDE.md
+
+BILLING_ARCHITECTURE.md
+
+CUSTOMER_SUCCESS_GUIDE.md
+
+REVOPS_MANUAL.md
+
+TRAINING_PLATFORM.md
+
+CRM_AUTOMATION.md
+
+SALES_PLAYBOOK.md
+
+API_ONBOARDING.md
+
+SELF_SERVICE_GUIDE.md
+
+---
+
+# FASE 15 — PAINEL "REALIDADE DO SISTEMA"
+
+Adicionar uma nova seção:
+
+## Comercial & Onboarding
+
+Exibir em tempo real:
+
+* Novos cadastros
+* Empresas em implantação
+* Empresas ativas
+* Trials ativos
+* Conversão de trial
+* Receita recorrente (MRR/ARR)
+* Churn
+* Health Score
+* Tempo médio de onboarding
+* Tempo até ativação
+* Uso da plataforma
+* Adoção por módulo
+* Satisfação (NPS/CSAT/CES)
+* Workflows de automação
+* Status das integrações de cobrança
+* Eventos processados
+* Alertas de risco
+* Oportunidades de upsell
+
+Todos os indicadores devem ser alimentados automaticamente por dados reais e atualizados continuamente.
+
+---
+
+# CRITÉRIOS DE ACEITE
+
+A etapa somente poderá ser considerada concluída quando:
+
+* O cadastro de empresas for totalmente self-service.
+* O onboarding ocorrer de forma automatizada.
+* O faturamento recorrente estiver operacional.
+* Os portais especializados estiverem funcionais.
+* Os treinamentos forem acessíveis pela plataforma.
+* O Customer Success possuir métricas em tempo real.
+* As automações comerciais estiverem integradas ao n8n.
+* Os dashboards executivos refletirem dados reais.
+* Todos os processos estiverem auditados e documentados.
+* A documentação estiver sincronizada com a implementação.
+
+---
+
+# RESULTADO ESPERADO
+
+Ao concluir esta etapa, a **NexoraField AI** deverá operar como uma plataforma SaaS **autônoma e orientada ao crescimento**, capaz de adquirir clientes, realizar cadastro, implantar empresas, treinar usuários, cobrar assinaturas, acompanhar indicadores de sucesso e expandir contratos sem intervenção manual. A plataforma deverá oferecer uma experiência completa de **self-service**, com automações inteligentes, integração total entre CRM, Billing, Customer Success e IA, elevando a eficiência operacional, reduzindo o tempo de implantação e preparando o negócio para escalar milhares de clientes de forma sustentável.
