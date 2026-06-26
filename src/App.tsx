@@ -9,6 +9,83 @@ import {
   INITIAL_REFERRALS, INITIAL_LEAD_COMPANIES, INITIAL_LEAD_TECHS
 } from "./data";
 
+// ---------- API helpers ----------
+async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(url, {
+    headers: { "Content-Type": "application/json" },
+    ...init,
+  });
+  if (!res.ok) throw new Error(`API error ${res.status}: ${await res.text()}`);
+  return res.json() as Promise<T>;
+}
+
+function mapTechRow(row: any): Technician {
+  return {
+    ...row,
+    specialties: row.specialties ?? [],
+    equipment: row.equipment ?? [],
+    availabilityDays: row.availabilityDays ?? row.availability_days ?? [],
+    availabilityHours: row.availabilityHours ?? row.availability_hours ?? "",
+    radiusKm: row.radiusKm ?? row.radius_km ?? 30,
+    pixKey: row.pixKey ?? row.pix_key ?? "",
+    pixType: row.pixType ?? row.pix_type ?? "",
+    bankName: row.bankName ?? row.bank_name ?? "",
+    accountNumber: row.accountNumber ?? row.account_number ?? "",
+    reviewsCount: row.reviewsCount ?? row.reviews_count ?? 0,
+    completedJobsCount: row.completedJobsCount ?? row.completed_jobs_count ?? 0,
+    documentsApproved: row.documentsApproved ?? row.documents_approved ?? false,
+    signedContract: row.signedContract ?? row.signed_contract ?? false,
+    badges: row.badges ?? [],
+    birthDate: row.birthDate ?? row.birth_date ?? "",
+  };
+}
+
+function mapTicketRow(row: any): Ticket {
+  return {
+    ...row,
+    photos: row.photos ?? [],
+    documents: row.documents ?? [],
+    checklist: row.checklist ?? [],
+    evidencePhotos: row.evidencePhotos ?? row.evidence_photos ?? [],
+    fraudAlerts: row.fraudAlerts ?? row.fraud_alerts ?? [],
+    invitedTechIds: row.invitedTechIds ?? row.invited_tech_ids ?? [],
+    declinedTechIds: row.declinedTechIds ?? row.declined_tech_ids ?? [],
+    assignedTechId: row.assignedTechId ?? row.assigned_tech_id,
+    companyId: row.companyId ?? row.company_id ?? "",
+    suggestedValue: row.suggestedValue ?? row.suggested_value ?? 0,
+    ratingByCompany: row.ratingByCompany ?? row.rating_by_company ?? undefined,
+    ratingByTech: row.ratingByTech ?? row.rating_by_tech ?? undefined,
+    technicalReport: row.technicalReport ?? row.technical_report,
+    clientSignature: row.clientSignature ?? row.client_signature,
+    invoiceUploaded: row.invoiceUploaded ?? row.invoice_uploaded ?? false,
+    createdAt: row.createdAt ?? row.created_at ?? new Date().toISOString(),
+  };
+}
+
+function mapTxRow(row: any): FinancialTransaction {
+  return {
+    ...row,
+    ticketId: row.ticketId ?? row.ticket_id ?? "",
+    ticketTitle: row.ticketTitle ?? row.ticket_title ?? "",
+    companyName: row.companyName ?? row.company_name ?? "",
+    techName: row.techName ?? row.tech_name ?? "",
+    totalAmount: row.totalAmount ?? row.total_amount ?? 0,
+    platformCommission: row.platformCommission ?? row.platform_commission ?? 15,
+    platformEarnings: row.platformEarnings ?? row.platform_earnings ?? 0,
+    techPayout: row.techPayout ?? row.tech_payout ?? 0,
+    paymentMethod: row.paymentMethod ?? row.payment_method ?? "PIX",
+    createdAt: row.createdAt ?? row.created_at ?? new Date().toISOString(),
+  };
+}
+
+function mapLogRow(row: any): AiAuditLog {
+  return {
+    ...row,
+    ticketId: row.ticketId ?? row.ticket_id,
+    timestamp: row.timestamp ?? new Date().toISOString(),
+  };
+}
+
 // Portals & Components
 import RoleSwitcher from "./components/RoleSwitcher";
 import AdminPortal from "./components/AdminPortal";
@@ -19,6 +96,8 @@ import SharedChat from "./components/SharedChat";
 import EnterpriseAuthModal from "./components/EnterpriseAuthModal";
 
 export default function App() {
+  const [dbLoaded, setDbLoaded] = useState(false);
+
   // Master state with LocalStorage synchronization
   const [role, setRole] = useState<'admin' | 'company' | 'tech' | 'comercial'>(() => {
     const saved = localStorage.getItem("nexorafield_role");
@@ -81,6 +160,31 @@ export default function App() {
     return saved ? JSON.parse(saved) : INITIAL_LEAD_TECHS;
   });
 
+  // Hydrate state from PostgreSQL API on mount
+  useEffect(() => {
+    async function loadFromDB() {
+      try {
+        const [compsRaw, techsRaw, ticketsRaw, txsRaw, logsRaw] = await Promise.all([
+          apiFetch<any[]>("/api/companies"),
+          apiFetch<any[]>("/api/technicians"),
+          apiFetch<any[]>("/api/tickets"),
+          apiFetch<any[]>("/api/transactions"),
+          apiFetch<any[]>("/api/audit-logs"),
+        ]);
+        if (compsRaw.length > 0) setCompanies(compsRaw);
+        if (techsRaw.length > 0) setTechnicians(techsRaw.map(mapTechRow));
+        if (ticketsRaw.length > 0) setTickets(ticketsRaw.map(mapTicketRow));
+        if (txsRaw.length > 0) setTransactions(txsRaw.map(mapTxRow));
+        if (logsRaw.length > 0) setAuditLogs(logsRaw.map(mapLogRow));
+        setDbLoaded(true);
+      } catch (err) {
+        console.warn("API hydration failed (using localStorage fallback):", err);
+        setDbLoaded(true);
+      }
+    }
+    loadFromDB();
+  }, []);
+
   // Save states to local storage on changes
   useEffect(() => {
     localStorage.setItem("nexorafield_role", role);
@@ -134,15 +238,15 @@ export default function App() {
   // Global Action Handlers
   // -------------------------------------------------------------
 
-  const handleAddCompany = (newComp: Omit<Company, 'id'>) => {
-    const comp: Company = {
-      ...newComp,
-      id: `comp-${Date.now()}`
-    };
+  const handleAddCompany = async (newComp: Omit<Company, 'id'>) => {
+    const comp: Company = { ...newComp, id: `comp-${Date.now()}` };
     setCompanies(prev => [...prev, comp]);
+    try {
+      await apiFetch("/api/companies", { method: "POST", body: JSON.stringify(comp) });
+    } catch (e) { console.warn("Failed to persist company:", e); }
   };
 
-  const handleAddTechnician = (newTech: Omit<Technician, 'id' | 'completedJobsCount' | 'reviewsCount' | 'rating' | 'documentsApproved' | 'signedContract'>) => {
+  const handleAddTechnician = async (newTech: Omit<Technician, 'id' | 'completedJobsCount' | 'reviewsCount' | 'rating' | 'documentsApproved' | 'signedContract'>) => {
     const tech: Technician = {
       ...newTech,
       id: `tech-${Date.now()}`,
@@ -153,28 +257,30 @@ export default function App() {
       signedContract: true
     };
     setTechnicians(prev => [...prev, tech]);
+    try {
+      await apiFetch("/api/technicians", { method: "POST", body: JSON.stringify(tech) });
+    } catch (e) { console.warn("Failed to persist technician:", e); }
   };
 
-  const handleAddTicket = (ticket: Ticket) => {
+  const handleAddTicket = async (ticket: Ticket) => {
     setTickets(prev => [...prev, ticket]);
+    try {
+      await apiFetch("/api/tickets", { method: "POST", body: JSON.stringify(ticket) });
+    } catch (e) { console.warn("Failed to persist ticket:", e); }
   };
 
-  const handleUpdateTicketStatus = (ticketId: string, status: any) => {
-    setTickets(prev => prev.map(t => {
-      if (t.id === ticketId) {
-        return { ...t, status };
-      }
-      return t;
-    }));
+  const handleUpdateTicketStatus = async (ticketId: string, status: any) => {
+    setTickets(prev => prev.map(t => t.id === ticketId ? { ...t, status } : t));
+    try {
+      await apiFetch(`/api/tickets/${ticketId}/status`, { method: "PATCH", body: JSON.stringify({ status }) });
+    } catch (e) { console.warn("Failed to persist ticket status:", e); }
   };
 
-  const handleAllocateTech = (ticketId: string, techId: string) => {
-    setTickets(prev => prev.map(t => {
-      if (t.id === ticketId) {
-        return { ...t, assignedTechId: techId };
-      }
-      return t;
-    }));
+  const handleAllocateTech = async (ticketId: string, techId: string) => {
+    setTickets(prev => prev.map(t => t.id === ticketId ? { ...t, assignedTechId: techId } : t));
+    try {
+      await apiFetch(`/api/tickets/${ticketId}/status`, { method: "PATCH", body: JSON.stringify({ assignedTechId: techId }) });
+    } catch (e) { console.warn("Failed to persist tech allocation:", e); }
   };
 
   const handleUpdateChecklist = (ticketId: string, checklist: any[]) => {
@@ -242,6 +348,8 @@ export default function App() {
     } as any;
 
     setTransactions(prev => [...prev, transaction]);
+    apiFetch("/api/transactions", { method: "POST", body: JSON.stringify(transaction) })
+      .catch(e => console.warn("Failed to persist transaction:", e));
 
     // 3. Update Technician metrics (ratings, jobs completed, points, badges, referrals)
     if (tech) {
@@ -453,13 +561,16 @@ export default function App() {
     setMessages(prev => [...prev, newMessage]);
   };
 
-  const handleAddAuditLog = (log: Omit<AiAuditLog, 'id' | 'timestamp'>) => {
+  const handleAddAuditLog = async (log: Omit<AiAuditLog, 'id' | 'timestamp'>) => {
     const newLog: AiAuditLog = {
       ...log,
       id: `log-${Date.now()}`,
       timestamp: new Date().toISOString()
     };
     setAuditLogs(prev => [...prev, newLog]);
+    try {
+      await apiFetch("/api/audit-logs", { method: "POST", body: JSON.stringify(newLog) });
+    } catch (e) { console.warn("Failed to persist audit log:", e); }
   };
 
   const handleLogout = (targetRole: 'admin' | 'company' | 'tech' | 'comercial') => {

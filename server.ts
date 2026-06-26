@@ -5,6 +5,11 @@ import dotenv from "dotenv";
 import { GoogleGenAI, Type } from "@google/genai";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import { eq, desc } from "drizzle-orm";
+import { db, initializeSchema } from "./db/index";
+import { users, companies, technicians, tickets, financialTransactions, aiAuditLogs } from "./db/schema";
+import { seedDatabase } from "./db/seed";
 
 dotenv.config();
 
@@ -515,65 +520,79 @@ app.post("/api/enterprise/ai/chat", async (req, res) => {
 // -------------------------------------------------------------
 const JWT_SECRET = process.env.JWT_SECRET || "nexorafield_jwt_enterprise_secret_key_2026";
 
-app.post("/api/auth/login", (req, res) => {
+app.post("/api/auth/login", async (req, res) => {
   const { email, password, role } = req.body;
 
   if (!email || !password) {
     return res.status(400).json({ error: "E-mail e senha são obrigatórios." });
   }
 
-  // Predefined enterprise logins matching mock data
-  const credentials: Record<string, { role: string; name: string; passwordHash: string }> = {
-    "admin@nexorafield.com": { role: "admin", name: "Super Admin", passwordHash: "admin123" },
-    "operacoes@solarsol.com.br": { role: "company", name: "SolarSol S.A. (Empresa)", passwordHash: "solarsol123" },
-    "alexandre.tech@gmail.com": { role: "tech", name: "Alexandre Santos (Técnico)", passwordHash: "tech123" },
-    "mariana.fibra@outlook.com": { role: "comercial", name: "Mariana Costa (Comercial)", passwordHash: "comercial123" }
-  };
+  try {
+    const [dbUser] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email.toLowerCase()))
+      .limit(1);
 
-  const matched = credentials[email.toLowerCase()];
-
-  // Support fallback for other mock emails so we don't break flexibility
-  let finalUser = matched;
-  if (!finalUser) {
-    // If it's a technician email or company email from mock data, allow generic login
-    if (email.includes("@solarsol.com.br") || email.includes("@telefonica.com.br") || email.includes("@fortress.com")) {
-      finalUser = { role: "company", name: "Empresa Parceira", passwordHash: "password123" };
-    } else if (email.includes("@gmail.com") || email.includes("@outlook.com") || email.includes("@yahoo.com")) {
-      finalUser = { role: "tech", name: "Técnico Parceiro", passwordHash: "password123" };
+    if (!dbUser) {
+      return res.status(401).json({ error: "Credenciais inválidas. Verifique o e-mail e senha inseridos." });
     }
-  }
 
-  if (!finalUser || password !== finalUser.passwordHash) {
-    return res.status(401).json({ error: "Credenciais inválidas. Verifique o e-mail e senha inseridos." });
-  }
-
-  // If a specific role was requested, ensure user has it
-  if (role && finalUser.role !== role) {
-    return res.status(403).json({ error: `Este usuário não possui permissão para acessar o portal de ${role}.` });
-  }
-
-  // Generate signed JWT token
-  const token = jwt.sign(
-    {
-      email: email.toLowerCase(),
-      role: finalUser.role,
-      name: finalUser.name,
-      tenantId: "tenant-solarsul-9021",
-      iat: Math.floor(Date.now() / 1000),
-    },
-    JWT_SECRET,
-    { expiresIn: "2h" }
-  );
-
-  res.json({
-    token,
-    user: {
-      email: email.toLowerCase(),
-      role: finalUser.role,
-      name: finalUser.name,
-      tenantId: "tenant-solarsul-9021"
+    const passwordMatch = await bcrypt.compare(password, dbUser.passwordHash);
+    if (!passwordMatch) {
+      return res.status(401).json({ error: "Credenciais inválidas. Verifique o e-mail e senha inseridos." });
     }
-  });
+
+    if (role && dbUser.role !== role) {
+      return res.status(403).json({ error: `Este usuário não possui permissão para acessar o portal de ${role}.` });
+    }
+
+    const token = jwt.sign(
+      {
+        email: dbUser.email,
+        role: dbUser.role,
+        name: dbUser.name,
+        tenantId: dbUser.tenantId,
+        userId: dbUser.id,
+        iat: Math.floor(Date.now() / 1000),
+      },
+      JWT_SECRET,
+      { expiresIn: "2h" }
+    );
+
+    res.json({
+      token,
+      user: {
+        email: dbUser.email,
+        role: dbUser.role,
+        name: dbUser.name,
+        tenantId: dbUser.tenantId,
+      }
+    });
+  } catch (error: any) {
+    console.error("Login error:", error);
+    res.status(500).json({ error: "Erro interno ao processar autenticação." });
+  }
+});
+
+// POST /api/auth/register - Register a new user
+app.post("/api/auth/register", async (req, res) => {
+  const { email, password, name, role } = req.body;
+  if (!email || !password || !name || !role) {
+    return res.status(400).json({ error: "Campos obrigatórios: email, password, name, role." });
+  }
+  try {
+    const passwordHash = await bcrypt.hash(password, 12);
+    const [newUser] = await db.insert(users).values({
+      email: email.toLowerCase(), passwordHash, name, role, tenantId: "nexorafield-default",
+    }).returning({ id: users.id, email: users.email, role: users.role, name: users.name });
+    res.status(201).json({ success: true, user: newUser });
+  } catch (error: any) {
+    if (error.code === "23505") {
+      return res.status(409).json({ error: "E-mail já cadastrado." });
+    }
+    res.status(500).json({ error: "Erro ao criar usuário." });
+  }
 });
 
 app.post("/api/auth/verify", (req, res) => {
@@ -590,6 +609,153 @@ app.post("/api/auth/verify", (req, res) => {
   } catch (error) {
     res.status(401).json({ valid: false, error: "Token inválido ou expirado." });
   }
+});
+
+// -------------------------------------------------------------
+// REST CRUD Endpoints — Entities
+// -------------------------------------------------------------
+
+// Companies
+app.get("/api/companies", async (_req, res) => {
+  try {
+    const data = await db.select().from(companies).orderBy(companies.createdAt);
+    res.json(data);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+app.post("/api/companies", async (req, res) => {
+  try {
+    const body = req.body;
+    const id = body.id || `comp-${Date.now()}`;
+    const [created] = await db.insert(companies).values({ ...body, id }).returning();
+    res.status(201).json(created);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+app.put("/api/companies/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [updated] = await db.update(companies).set({ ...req.body, updatedAt: new Date() })
+      .where(eq(companies.id, id)).returning();
+    if (!updated) return res.status(404).json({ error: "Company not found" });
+    res.json(updated);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete("/api/companies/:id", async (req, res) => {
+  try {
+    await db.delete(companies).where(eq(companies.id, req.params.id));
+    res.json({ success: true });
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// Technicians
+app.get("/api/technicians", async (_req, res) => {
+  try {
+    const data = await db.select().from(technicians).orderBy(technicians.createdAt);
+    res.json(data);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+app.post("/api/technicians", async (req, res) => {
+  try {
+    const body = req.body;
+    const id = body.id || `tech-${Date.now()}`;
+    const [created] = await db.insert(technicians).values({ ...body, id }).returning();
+    res.status(201).json(created);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+app.put("/api/technicians/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [updated] = await db.update(technicians).set({ ...req.body, updatedAt: new Date() })
+      .where(eq(technicians.id, id)).returning();
+    if (!updated) return res.status(404).json({ error: "Technician not found" });
+    res.json(updated);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete("/api/technicians/:id", async (req, res) => {
+  try {
+    await db.delete(technicians).where(eq(technicians.id, req.params.id));
+    res.json({ success: true });
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// Tickets
+app.get("/api/tickets", async (_req, res) => {
+  try {
+    const data = await db.select().from(tickets).orderBy(desc(tickets.createdAt));
+    res.json(data);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+app.post("/api/tickets", async (req, res) => {
+  try {
+    const body = req.body;
+    const id = body.id || `ticket-${Date.now()}`;
+    const [created] = await db.insert(tickets).values({ ...body, id }).returning();
+    res.status(201).json(created);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+app.put("/api/tickets/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [updated] = await db.update(tickets).set({ ...req.body, updatedAt: new Date() })
+      .where(eq(tickets.id, id)).returning();
+    if (!updated) return res.status(404).json({ error: "Ticket not found" });
+    res.json(updated);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+app.patch("/api/tickets/:id/status", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, assignedTechId, ...rest } = req.body;
+    const updateData: any = { updatedAt: new Date() };
+    if (status) updateData.status = status;
+    if (assignedTechId !== undefined) updateData.assignedTechId = assignedTechId;
+    Object.assign(updateData, rest);
+    const [updated] = await db.update(tickets).set(updateData).where(eq(tickets.id, id)).returning();
+    if (!updated) return res.status(404).json({ error: "Ticket not found" });
+    res.json(updated);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// Transactions
+app.get("/api/transactions", async (_req, res) => {
+  try {
+    const data = await db.select().from(financialTransactions).orderBy(desc(financialTransactions.createdAt));
+    res.json(data);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+app.post("/api/transactions", async (req, res) => {
+  try {
+    const body = req.body;
+    const id = body.id || `trans-${Date.now()}`;
+    const [created] = await db.insert(financialTransactions).values({ ...body, id }).returning();
+    res.status(201).json(created);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// AI Audit Logs
+app.get("/api/audit-logs", async (_req, res) => {
+  try {
+    const data = await db.select().from(aiAuditLogs).orderBy(desc(aiAuditLogs.timestamp));
+    res.json(data);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+app.post("/api/audit-logs", async (req, res) => {
+  try {
+    const body = req.body;
+    const id = body.id || `log-${Date.now()}`;
+    const [created] = await db.insert(aiAuditLogs).values({ ...body, id }).returning();
+    res.status(201).json(created);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
 });
 
 // -------------------------------------------------------------
@@ -688,6 +854,15 @@ app.get("/api/metrics", (req, res) => {
 // Vite and Static File Server configuration
 // -------------------------------------------------------------
 async function startServer() {
+  // Initialize DB schema and seed initial data
+  try {
+    await initializeSchema();
+    await seedDatabase();
+    console.log("✅ Database ready.");
+  } catch (err) {
+    console.error("❌ Database initialization failed:", err);
+  }
+
   if (process.env.NODE_ENV !== "production") {
     console.log("Starting server in DEVELOPMENT mode with Vite Middleware...");
     const vite = await createViteServer({

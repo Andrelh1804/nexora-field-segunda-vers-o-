@@ -1,0 +1,1 @@
+- [NexoraField DB Architecture](nexorafield-db.md) — PostgreSQL via Drizzle ORM; schema auto-creates on startup; seed checks tickets table (not users) to avoid re-seed.
