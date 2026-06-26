@@ -13,6 +13,7 @@ import AdminCompliancePanel from "./AdminCompliancePanel";
 import RealityAuditPanel from "./RealityAuditPanel";
 import EnterprisePortal from "./EnterprisePortal";
 import InfrastructurePanel from "./InfrastructurePanel";
+import UserManagementPanel from "./UserManagementPanel";
 
 interface AdminPortalProps {
   companies: Company[];
@@ -267,6 +268,12 @@ export default function AdminPortal({
             className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${activeSubTab === 'infra' ? 'bg-gradient-to-r from-indigo-700 to-blue-700 text-white border border-indigo-500/30 shadow-md shadow-indigo-600/10' : 'text-slate-400 hover:text-slate-200'}`}
           >
             Infraestrutura Enterprise ⚡
+          </button>
+          <button
+            onClick={() => setActiveSubTab('users')}
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${activeSubTab === 'users' ? 'bg-gradient-to-r from-rose-700 to-pink-700 text-white border border-rose-500/30 shadow-md shadow-rose-600/10' : 'text-slate-400 hover:text-slate-200'}`}
+          >
+            Gestão de Usuários 👥
           </button>
         </div>
       </div>
@@ -1477,6 +1484,15 @@ export default function AdminPortal({
       {activeSubTab === 'enterprise' && <EnterprisePortal />}
 
       {activeSubTab === 'infra' && <InfrastructurePanel />}
+
+      {/* --------------------------------------------------------------------------------- */}
+      {/* 13. USER MANAGEMENT */}
+      {/* --------------------------------------------------------------------------------- */}
+      {activeSubTab === 'users' && (
+        <div className="bg-[#0a0c14] border border-slate-800/60 rounded-2xl p-6">
+          <UserManagementPanel />
+        </div>
+      )}
     </div>
   );
 }

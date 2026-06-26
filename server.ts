@@ -575,6 +575,81 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
+// GET /api/users - List all users (admin)
+app.get("/api/users", async (_req, res) => {
+  try {
+    const allUsers = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        role: users.role,
+        name: users.name,
+        tenantId: users.tenantId,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .orderBy(users.createdAt);
+    res.json(allUsers);
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// PUT /api/users/:id - Update user name and role
+app.put("/api/users/:id", async (req, res) => {
+  const { id } = req.params;
+  const { name, role } = req.body;
+  if (!name && !role) {
+    return res.status(400).json({ error: "Forneça name ou role para atualizar." });
+  }
+  try {
+    const updateData: any = {};
+    if (name) updateData.name = name;
+    if (role) updateData.role = role;
+    const [updated] = await db
+      .update(users)
+      .set(updateData)
+      .where(eq(users.id, id))
+      .returning({ id: users.id, email: users.email, role: users.role, name: users.name });
+    if (!updated) return res.status(404).json({ error: "Usuário não encontrado." });
+    res.json({ success: true, user: updated });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// PUT /api/users/:id/password - Change user password
+app.put("/api/users/:id/password", async (req, res) => {
+  const { id } = req.params;
+  const { password } = req.body;
+  if (!password || password.length < 6) {
+    return res.status(400).json({ error: "A senha deve ter pelo menos 6 caracteres." });
+  }
+  try {
+    const passwordHash = await bcrypt.hash(password, 12);
+    const [updated] = await db
+      .update(users)
+      .set({ passwordHash })
+      .where(eq(users.id, id))
+      .returning({ id: users.id });
+    if (!updated) return res.status(404).json({ error: "Usuário não encontrado." });
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// DELETE /api/users/:id - Revoke user access
+app.delete("/api/users/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    await db.delete(users).where(eq(users.id, id));
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // POST /api/auth/register - Register a new user
 app.post("/api/auth/register", async (req, res) => {
   const { email, password, name, role } = req.body;
