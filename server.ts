@@ -8,7 +8,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { eq, desc } from "drizzle-orm";
 import { db, initializeSchema } from "./db/index";
-import { users, companies, technicians, tickets, financialTransactions, aiAuditLogs } from "./db/schema";
+import { users, companies, technicians, tickets, financialTransactions, aiAuditLogs, webhooks, webhookDeliveries } from "./db/schema";
 import { seedDatabase } from "./db/seed";
 
 dotenv.config();
@@ -831,6 +831,176 @@ app.post("/api/audit-logs", async (req, res) => {
     const [created] = await db.insert(aiAuditLogs).values({ ...body, id }).returning();
     res.status(201).json(created);
   } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// -------------------------------------------------------------
+// Webhook System
+// -------------------------------------------------------------
+
+// Helper: sign payload with HMAC-SHA256
+function signPayload(payload: string, secret: string): string {
+  return "sha256=" + crypto.createHmac("sha256", secret).update(payload).digest("hex");
+}
+
+// Helper: deliver one webhook
+async function deliverWebhook(wh: any, event: string, data: any): Promise<void> {
+  const payload = JSON.stringify({ event, timestamp: new Date().toISOString(), data });
+  const signature = signPayload(payload, wh.secret);
+  const start = Date.now();
+  let statusCode = 0;
+  let status: "success" | "error" = "error";
+  let responseBody = "";
+  let errorMsg = "";
+
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 10000);
+    const response = await fetch(wh.url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Nexora-Signature": signature,
+        "X-Nexora-Event": event,
+        "X-Nexora-Delivery": crypto.randomUUID(),
+        "User-Agent": "NexoraField-Webhooks/7.0",
+      },
+      body: payload,
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    statusCode = response.status;
+    responseBody = (await response.text()).slice(0, 500);
+    status = response.ok ? "success" : "error";
+  } catch (err: any) {
+    errorMsg = err.message || "Request failed";
+    status = "error";
+  }
+
+  const duration = Date.now() - start;
+
+  // Persist delivery log
+  await db.insert(webhookDeliveries).values({
+    webhookId: wh.id,
+    event,
+    payload: JSON.parse(payload),
+    statusCode: statusCode || null,
+    status,
+    responseBody: responseBody || null,
+    error: errorMsg || null,
+    duration,
+    deliveredAt: new Date(),
+  });
+
+  // Update webhook meta
+  await db.update(webhooks).set({
+    lastStatus: status,
+    lastStatusCode: statusCode || null,
+    lastDeliveredAt: new Date(),
+    lastError: errorMsg || null,
+    deliveryCount: (wh.deliveryCount || 0) + 1,
+    updatedAt: new Date(),
+  }).where(eq(webhooks.id, wh.id));
+}
+
+// Exported trigger function: fan-out to all enabled webhooks subscribed to event
+export async function triggerWebhookEvent(event: string, data: any): Promise<void> {
+  try {
+    const enabled = await db.select().from(webhooks).where(eq(webhooks.enabled, true));
+    const targets = enabled.filter((wh) => (wh.events as string[]).includes(event));
+    await Promise.allSettled(targets.map((wh) => deliverWebhook(wh, event, data)));
+  } catch (err) {
+    console.error("[Webhooks] Fan-out error:", err);
+  }
+}
+
+// GET /api/webhooks
+app.get("/api/webhooks", async (_req, res) => {
+  try {
+    const all = await db.select().from(webhooks).orderBy(desc(webhooks.createdAt));
+    // Never expose the secret in listings
+    res.json(all.map(w => ({ ...w, secret: "••••••••" })));
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// POST /api/webhooks
+app.post("/api/webhooks", async (req, res) => {
+  const { name, url, secret, events: evts, enabled } = req.body;
+  if (!name || !url || !evts?.length) {
+    return res.status(400).json({ error: "name, url e events são obrigatórios." });
+  }
+  try {
+    const generatedSecret = secret || crypto.randomBytes(24).toString("hex");
+    const [created] = await db.insert(webhooks).values({
+      name,
+      url,
+      secret: generatedSecret,
+      events: evts,
+      enabled: enabled !== false,
+    }).returning();
+    res.status(201).json({ ...created, secret: generatedSecret }); // return secret once on creation
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// PUT /api/webhooks/:id
+app.put("/api/webhooks/:id", async (req, res) => {
+  const { id } = req.params;
+  const { name, url, events: evts, enabled } = req.body;
+  try {
+    const updateData: any = { updatedAt: new Date() };
+    if (name !== undefined) updateData.name = name;
+    if (url !== undefined) updateData.url = url;
+    if (evts !== undefined) updateData.events = evts;
+    if (enabled !== undefined) updateData.enabled = enabled;
+    const [updated] = await db.update(webhooks).set(updateData)
+      .where(eq(webhooks.id, id)).returning();
+    if (!updated) return res.status(404).json({ error: "Webhook não encontrado." });
+    res.json({ ...updated, secret: "••••••••" });
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// DELETE /api/webhooks/:id
+app.delete("/api/webhooks/:id", async (req, res) => {
+  try {
+    await db.delete(webhookDeliveries).where(eq(webhookDeliveries.webhookId, req.params.id as any));
+    await db.delete(webhooks).where(eq(webhooks.id, req.params.id as any));
+    res.json({ success: true });
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// POST /api/webhooks/:id/test — fire a test delivery
+app.post("/api/webhooks/:id/test", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [wh] = await db.select().from(webhooks).where(eq(webhooks.id, id as any)).limit(1);
+    if (!wh) return res.status(404).json({ error: "Webhook não encontrado." });
+    await deliverWebhook(wh, "test.ping", {
+      message: "Este é um teste de entrega do NexoraField Webhooks.",
+      platform: "NexoraField v7.0",
+      timestamp: new Date().toISOString(),
+    });
+    // Fetch updated status
+    const [updated] = await db.select().from(webhooks).where(eq(webhooks.id, id as any)).limit(1);
+    res.json({ success: true, lastStatus: updated.lastStatus, lastStatusCode: updated.lastStatusCode });
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// GET /api/webhooks/:id/deliveries
+app.get("/api/webhooks/:id/deliveries", async (req, res) => {
+  try {
+    const deliveries = await db.select().from(webhookDeliveries)
+      .where(eq(webhookDeliveries.webhookId, req.params.id as any))
+      .orderBy(desc(webhookDeliveries.deliveredAt))
+      .limit(50);
+    res.json(deliveries);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// POST /api/webhooks/trigger — internal trigger from app events
+app.post("/api/webhooks/trigger", async (req, res) => {
+  const { event, data } = req.body;
+  if (!event) return res.status(400).json({ error: "event é obrigatório." });
+  triggerWebhookEvent(event, data || {}).catch(() => {});
+  res.json({ success: true, message: `Event '${event}' enqueued for delivery.` });
 });
 
 // -------------------------------------------------------------

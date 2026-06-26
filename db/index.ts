@@ -148,6 +148,35 @@ export async function initializeSchema() {
         details JSONB,
         timestamp TIMESTAMP DEFAULT NOW() NOT NULL
       );
+
+      CREATE TABLE IF NOT EXISTS webhooks (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(255) NOT NULL,
+        url TEXT NOT NULL,
+        secret VARCHAR(255) NOT NULL,
+        events JSONB NOT NULL DEFAULT '[]',
+        enabled BOOLEAN NOT NULL DEFAULT TRUE,
+        last_status VARCHAR(20),
+        last_status_code INTEGER,
+        last_delivered_at TIMESTAMP,
+        last_error TEXT,
+        delivery_count INTEGER NOT NULL DEFAULT 0,
+        created_at TIMESTAMP DEFAULT NOW() NOT NULL,
+        updated_at TIMESTAMP DEFAULT NOW() NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS webhook_deliveries (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        webhook_id UUID NOT NULL,
+        event VARCHAR(100) NOT NULL,
+        payload JSONB,
+        status_code INTEGER,
+        status VARCHAR(20) NOT NULL,
+        response_body TEXT,
+        error TEXT,
+        duration INTEGER,
+        delivered_at TIMESTAMP DEFAULT NOW() NOT NULL
+      );
     `);
     console.log("✅ Database schema initialized successfully.");
   } catch (error) {

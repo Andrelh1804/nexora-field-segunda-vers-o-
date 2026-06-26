@@ -14,6 +14,7 @@ import RealityAuditPanel from "./RealityAuditPanel";
 import EnterprisePortal from "./EnterprisePortal";
 import InfrastructurePanel from "./InfrastructurePanel";
 import UserManagementPanel from "./UserManagementPanel";
+import WebhookPanel from "./WebhookPanel";
 
 interface AdminPortalProps {
   companies: Company[];
@@ -274,6 +275,12 @@ export default function AdminPortal({
             className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${activeSubTab === 'users' ? 'bg-gradient-to-r from-rose-700 to-pink-700 text-white border border-rose-500/30 shadow-md shadow-rose-600/10' : 'text-slate-400 hover:text-slate-200'}`}
           >
             Gestão de Usuários 👥
+          </button>
+          <button
+            onClick={() => setActiveSubTab('webhooks')}
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${activeSubTab === 'webhooks' ? 'bg-gradient-to-r from-violet-700 to-purple-700 text-white border border-violet-500/30 shadow-md shadow-violet-600/10' : 'text-slate-400 hover:text-slate-200'}`}
+          >
+            Webhooks 🔔
           </button>
         </div>
       </div>
@@ -1491,6 +1498,15 @@ export default function AdminPortal({
       {activeSubTab === 'users' && (
         <div className="bg-[#0a0c14] border border-slate-800/60 rounded-2xl p-6">
           <UserManagementPanel />
+        </div>
+      )}
+
+      {/* --------------------------------------------------------------------------------- */}
+      {/* 14. WEBHOOKS */}
+      {/* --------------------------------------------------------------------------------- */}
+      {activeSubTab === 'webhooks' && (
+        <div className="bg-[#0a0c14] border border-slate-800/60 rounded-2xl p-6">
+          <WebhookPanel />
         </div>
       )}
     </div>

@@ -132,3 +132,32 @@ export const aiAuditLogs = pgTable("ai_audit_logs", {
   details: jsonb("details"),
   timestamp: timestamp("timestamp").defaultNow().notNull(),
 });
+
+export const webhooks = pgTable("webhooks", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 255 }).notNull(),
+  url: text("url").notNull(),
+  secret: varchar("secret", { length: 255 }).notNull(),
+  events: jsonb("events").$type<string[]>().notNull().default([]),
+  enabled: boolean("enabled").notNull().default(true),
+  lastStatus: varchar("last_status", { length: 20 }), // success | error | pending | null
+  lastStatusCode: integer("last_status_code"),
+  lastDeliveredAt: timestamp("last_delivered_at"),
+  lastError: text("last_error"),
+  deliveryCount: integer("delivery_count").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const webhookDeliveries = pgTable("webhook_deliveries", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  webhookId: uuid("webhook_id").notNull(),
+  event: varchar("event", { length: 100 }).notNull(),
+  payload: jsonb("payload"),
+  statusCode: integer("status_code"),
+  status: varchar("status", { length: 20 }).notNull(), // success | error | pending
+  responseBody: text("response_body"),
+  error: text("error"),
+  duration: integer("duration"), // ms
+  deliveredAt: timestamp("delivered_at").defaultNow().notNull(),
+});
