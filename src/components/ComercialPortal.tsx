@@ -2,9 +2,17 @@ import React, { useState } from "react";
 import { 
   Briefcase, Calendar, Users, TrendingUp, Sparkles, Plus, 
   ChevronRight, Phone, Mail, DollarSign, Activity, FileText, 
-  Clock, CheckCircle, AlertCircle, Award, PlayCircle, Star
+  Clock, CheckCircle, AlertCircle, Award, PlayCircle, Star,
+  BarChart2, Heart, BookOpen, CreditCard, Upload, Bot, Zap, Globe
 } from "lucide-react";
 import { LeadCompany, LeadTech, Company, Technician } from "../types";
+import ExecutiveDashboard from "./commercial/ExecutiveDashboard";
+import CustomerSuccess from "./commercial/CustomerSuccess";
+import TrainingPlatform from "./commercial/TrainingPlatform";
+import BillingPortal from "./commercial/BillingPortal";
+import DataImport from "./commercial/DataImport";
+import AICommercial from "./commercial/AICommercial";
+import SystemRealityCommercial from "./commercial/SystemRealityCommercial";
 
 interface ComercialPortalProps {
   leadCompanies: LeadCompany[];
@@ -27,7 +35,7 @@ export default function ComercialPortal({
   onAddCompany,
   onAddAuditLog
 }: ComercialPortalProps) {
-  const [activeSubTab, setActiveSubTab] = useState<'pipeline' | 'meetings' | 'growth_engine'>('pipeline');
+  const [activeSubTab, setActiveSubTab] = useState<'pipeline' | 'meetings' | 'growth_engine' | 'executive' | 'cs' | 'training' | 'billing' | 'import' | 'ai' | 'reality'>('pipeline');
 
   // Search/Filters
   const [leadSearch, setLeadSearch] = useState("");
@@ -257,24 +265,66 @@ Próximos Passos recomendados:
           </p>
         </div>
 
-        <div className="flex bg-[#12162a] p-1 rounded-xl border border-[#202952] gap-1 text-xs">
+        <div className="flex flex-wrap bg-[#12162a] p-1 rounded-xl border border-[#202952] gap-1 text-xs">
           <button
             onClick={() => setActiveSubTab('pipeline')}
-            className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${activeSubTab === 'pipeline' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1 ${activeSubTab === 'pipeline' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}
           >
-            Pipeline & CRM
+            <Briefcase className="h-3 w-3" /> Pipeline & CRM
           </button>
           <button
             onClick={() => setActiveSubTab('meetings')}
-            className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${activeSubTab === 'meetings' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1 ${activeSubTab === 'meetings' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}
           >
-            Reuniões & Demonstrações
+            <Calendar className="h-3 w-3" /> Reuniões
           </button>
           <button
             onClick={() => setActiveSubTab('growth_engine')}
-            className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${activeSubTab === 'growth_engine' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1 ${activeSubTab === 'growth_engine' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}
           >
-            Growth Sourcing Engine
+            <Globe className="h-3 w-3" /> Growth Engine
+          </button>
+          <button
+            onClick={() => setActiveSubTab('executive')}
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1 ${activeSubTab === 'executive' ? 'bg-cyan-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}
+          >
+            <BarChart2 className="h-3 w-3" /> Executive
+          </button>
+          <button
+            onClick={() => setActiveSubTab('cs')}
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1 ${activeSubTab === 'cs' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}
+          >
+            <Heart className="h-3 w-3" /> Customer Success
+          </button>
+          <button
+            onClick={() => setActiveSubTab('training')}
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1 ${activeSubTab === 'training' ? 'bg-purple-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}
+          >
+            <BookOpen className="h-3 w-3" /> Treinamento
+          </button>
+          <button
+            onClick={() => setActiveSubTab('billing')}
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1 ${activeSubTab === 'billing' ? 'bg-green-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}
+          >
+            <CreditCard className="h-3 w-3" /> Billing
+          </button>
+          <button
+            onClick={() => setActiveSubTab('import')}
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1 ${activeSubTab === 'import' ? 'bg-orange-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}
+          >
+            <Upload className="h-3 w-3" /> Importação
+          </button>
+          <button
+            onClick={() => setActiveSubTab('ai')}
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1 ${activeSubTab === 'ai' ? 'bg-pink-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}
+          >
+            <Bot className="h-3 w-3" /> IA Comercial
+          </button>
+          <button
+            onClick={() => setActiveSubTab('reality')}
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1 ${activeSubTab === 'reality' ? 'bg-slate-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}
+          >
+            <Zap className="h-3 w-3" /> System Reality
           </button>
         </div>
       </div>
@@ -789,6 +839,57 @@ Próximos Passos recomendados:
           </div>
 
         </div>
+      )}
+
+      {/* EXECUTIVE DASHBOARD TAB */}
+      {activeSubTab === 'executive' && (
+        <ExecutiveDashboard
+          companies={companies}
+          technicians={technicians}
+          tickets={[]}
+          transactions={[]}
+          auditLogs={[]}
+        />
+      )}
+
+      {/* CUSTOMER SUCCESS TAB */}
+      {activeSubTab === 'cs' && (
+        <CustomerSuccess
+          companies={companies}
+          tickets={[]}
+          transactions={[]}
+        />
+      )}
+
+      {/* TRAINING PLATFORM TAB */}
+      {activeSubTab === 'training' && (
+        <TrainingPlatform />
+      )}
+
+      {/* BILLING PORTAL TAB */}
+      {activeSubTab === 'billing' && (
+        <BillingPortal companies={companies} transactions={[]} />
+      )}
+
+      {/* DATA IMPORT TAB */}
+      {activeSubTab === 'import' && (
+        <DataImport />
+      )}
+
+      {/* AI COMMERCIAL AGENTS TAB */}
+      {activeSubTab === 'ai' && (
+        <AICommercial />
+      )}
+
+      {/* SYSTEM REALITY TAB */}
+      {activeSubTab === 'reality' && (
+        <SystemRealityCommercial
+          companies={companies}
+          technicians={technicians}
+          tickets={[]}
+          transactions={[]}
+          auditLogs={[]}
+        />
       )}
 
       {/* Add Lead Modal */}

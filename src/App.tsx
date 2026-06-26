@@ -94,9 +94,16 @@ import TechnicianPortal from "./components/TechnicianPortal";
 import ComercialPortal from "./components/ComercialPortal";
 import SharedChat from "./components/SharedChat";
 import EnterpriseAuthModal from "./components/EnterpriseAuthModal";
+import LandingPage from "./components/LandingPage";
+import SelfServiceRegister from "./components/SelfServiceRegister";
+import OnboardingWizard from "./components/OnboardingWizard";
+
+type AppView = 'landing' | 'register' | 'onboarding' | 'app';
 
 export default function App() {
   const [dbLoaded, setDbLoaded] = useState(false);
+  const [appView, setAppView] = useState<AppView>('landing');
+  const [onboardingData, setOnboardingData] = useState<{ company: any; user: any; plan: string } | null>(null);
 
   // Master state with LocalStorage synchronization
   const [role, setRole] = useState<'admin' | 'company' | 'tech' | 'comercial'>(() => {
@@ -638,6 +645,41 @@ export default function App() {
   // Pre-selected entities for Portals demo
   const currentCompany = companies[1] || companies[0]; // SolarSol S.A.
   const currentTech = technicians[0]; // Alexandre Santos
+
+  // Landing page view
+  if (appView === 'landing') {
+    return (
+      <LandingPage
+        onGoToRegister={() => setAppView('register')}
+        onGoToLogin={() => setAppView('app')}
+      />
+    );
+  }
+
+  // Self-service registration view
+  if (appView === 'register') {
+    return (
+      <SelfServiceRegister
+        onSuccess={(data) => {
+          setOnboardingData(data);
+          setAppView('onboarding');
+        }}
+        onBack={() => setAppView('landing')}
+      />
+    );
+  }
+
+  // Onboarding wizard view
+  if (appView === 'onboarding' && onboardingData) {
+    return (
+      <OnboardingWizard
+        company={onboardingData.company}
+        user={onboardingData.user}
+        plan={onboardingData.plan}
+        onComplete={() => setAppView('app')}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#04060a] text-slate-100 flex flex-col font-sans">
