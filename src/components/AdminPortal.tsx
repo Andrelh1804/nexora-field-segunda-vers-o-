@@ -12,6 +12,7 @@ import AdminPlansManager from "./AdminPlansManager";
 import AdminCompliancePanel from "./AdminCompliancePanel";
 import RealityAuditPanel from "./RealityAuditPanel";
 import EnterprisePortal from "./EnterprisePortal";
+import InfrastructurePanel from "./InfrastructurePanel";
 
 interface AdminPortalProps {
   companies: Company[];
@@ -52,7 +53,7 @@ export default function AdminPortal({
   onCancelTicket,
   onReopenTicket
 }: AdminPortalProps) {
-  const [activeSubTab, setActiveSubTab] = useState<'dash' | 'cadastro' | 'chamados' | 'financeiro' | 'logs' | 'growth' | 'bi' | 'plans' | 'compliance' | 'reality' | 'enterprise'>('dash');
+  const [activeSubTab, setActiveSubTab] = useState<'dash' | 'cadastro' | 'chamados' | 'financeiro' | 'logs' | 'growth' | 'bi' | 'plans' | 'compliance' | 'reality' | 'enterprise' | 'infra'>('dash');
   
   // Search & Filter state for tickets
   const [ticketFilterSearch, setTicketFilterSearch] = useState("");
@@ -260,6 +261,12 @@ export default function AdminPortal({
             className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${activeSubTab === 'enterprise' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border border-emerald-500/30 shadow-md shadow-emerald-600/10 animate-pulse' : 'text-slate-400 hover:text-slate-200'}`}
           >
             Módulo Enterprise 🌐
+          </button>
+          <button
+            onClick={() => setActiveSubTab('infra')}
+            className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${activeSubTab === 'infra' ? 'bg-gradient-to-r from-indigo-700 to-blue-700 text-white border border-indigo-500/30 shadow-md shadow-indigo-600/10' : 'text-slate-400 hover:text-slate-200'}`}
+          >
+            Infraestrutura Enterprise ⚡
           </button>
         </div>
       </div>
@@ -1468,6 +1475,8 @@ export default function AdminPortal({
       {/* 11. ENTERPRISE SUITE (V4.0) */}
       {/* --------------------------------------------------------------------------------- */}
       {activeSubTab === 'enterprise' && <EnterprisePortal />}
+
+      {activeSubTab === 'infra' && <InfrastructurePanel />}
     </div>
   );
 }

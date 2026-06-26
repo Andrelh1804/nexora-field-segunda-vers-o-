@@ -1,0 +1,21 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: nexora-api-pdb
+  namespace: nexorafield
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: nexora-api
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: nexora-worker-ai-pdb
+  namespace: nexorafield
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: nexora-worker-ai

@@ -1,0 +1,93 @@
+# GOOGLE_CLOUD_ARCHITECTURE.md — NexoraField AI v7.0
+
+## VISÃO GERAL DA ARQUITETURA GCP
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                  GCP Project: nexorafield-prod                  │
+│                  Região: southamerica-east1 (São Paulo)         │
+└─────────────────────────────────────────────────────────────────┘
+
+Internet
+   │
+   ▼
+┌──────────────────────────────┐
+│  Cloud DNS                   │  app.nexorafield.com.br → LB IP
+│  app.nexorafield.com.br       │
+└──────────┬───────────────────┘
+           │
+┌──────────▼───────────────────┐
+│  Cloud Armor (WAF)            │  OWASP Top 10, DDoS, Rate limit
+│  cloud-armor-policy-nexora    │  100 req/min por IP
+└──────────┬───────────────────┘
+           │
+┌──────────▼───────────────────┐
+│  Cloud CDN                    │  Cache de assets estáticos
+│  + HTTPS Load Balancer        │  TLS 1.3 terminado aqui
+│  Managed SSL Certificate      │
+└──────────┬───────────────────┘
+           │
+┌──────────▼───────────────────────────────────────────────────┐
+│  VPC: nexorafield-vpc  (10.0.0.0/8)                         │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │  Subnet pública: 10.10.0.0/24 (southamerica-east1)      │ │
+│  │                                                           │ │
+│  │  ┌─────────────────────────────────────────────────────┐ │ │
+│  │  │  GKE Autopilot Cluster: nexora-cluster-prod         │ │ │
+│  │  │                                                       │ │ │
+│  │  │  Namespace: nexorafield                               │ │ │
+│  │  │  ├── nexora-api (2-20 pods, HPA)                     │ │ │
+│  │  │  ├── nexora-worker-ai (1-10 pods)                    │ │ │
+│  │  │  ├── nexora-worker-fin (1-5 pods)                    │ │ │
+│  │  │  ├── nexora-worker-notif (1-5 pods)                  │ │ │
+│  │  │  ├── nexora-scheduler (1 pod)                        │ │ │
+│  │  │  └── nexora-gateway (2 pods)                         │ │ │
+│  │  └─────────────────────────────────────────────────────┘ │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │  Subnet privada: 10.20.0.0/24 (sem acesso à internet)   │ │
+│  │                                                           │ │
+│  │  ├── Cloud SQL PostgreSQL 15 HA                          │ │
+│  │  │   Primary: 10.20.0.10                                 │ │
+│  │  │   Replica:  10.20.0.11                                │ │
+│  │  │                                                        │ │
+│  │  └── Memorystore Redis 7 (Sentinel)                      │ │
+│  │       Primary: 10.20.0.20                                │ │
+│  │       Replicas: 10.20.0.21, 10.20.0.22                   │ │
+│  └─────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────┘
+
+Serviços Gerenciados (fora da VPC):
+├── Google Gemini API (external HTTPS)
+├── Cloud Storage (multi-region sa)
+├── Secret Manager
+├── Artifact Registry (gcr.io/nexorafield)
+├── Cloud Build (CI/CD)
+├── Cloud Logging + Monitoring
+└── Cloud Scheduler + Tasks
+```
+
+## FIREWALL RULES
+
+| Rule Name | Direction | Source | Destination | Porta | Ação |
+|---|---|---|---|---|---|
+| allow-https-lb | INGRESS | 0.0.0.0/0 | LB | 443 | ALLOW |
+| allow-http-redirect | INGRESS | 0.0.0.0/0 | LB | 80 | ALLOW |
+| allow-gke-to-sql | INGRESS | GKE subnet | Cloud SQL | 5432 | ALLOW |
+| allow-gke-to-redis | INGRESS | GKE subnet | Redis | 6379 | ALLOW |
+| deny-all-ingress | INGRESS | 0.0.0.0/0 | Private subnet | * | DENY |
+| allow-nat-egress | EGRESS | Private subnet | 0.0.0.0/0 | 443 | ALLOW |
+
+## IAM ROLES
+
+| Principal | Role | Recurso |
+|---|---|---|
+| nexora-api-sa | roles/cloudsql.client | Cloud SQL |
+| nexora-api-sa | roles/redis.viewer | Memorystore |
+| nexora-api-sa | roles/secretmanager.secretAccessor | Secret Manager |
+| nexora-api-sa | roles/storage.objectViewer | Cloud Storage |
+| nexora-build-sa | roles/artifactregistry.writer | Artifact Registry |
+| nexora-build-sa | roles/container.developer | GKE |
+| GitHub Actions | roles/iam.workloadIdentityUser | Workload Identity |
